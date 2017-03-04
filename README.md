@@ -24,10 +24,18 @@ docker run -d -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=kafka --env ADVERT
 Create topics:
 
 ```
+docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
 docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic telegram_in
 docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic telegram_out
+docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic telegram_subs
 docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic facebook_in
 docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic facebook_out
+```
+
+List topics:
+
+```
+docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --list --zookeeper localhost:2181
 ```
 
 Add kafka to /etc/hosts:
@@ -38,7 +46,7 @@ Add kafka to /etc/hosts:
 
 ## Modules
 
-## Kafka
+### Kafka
 
 All the messaging clients will subscribe/publish to kafka, so we can abstract all the logic from the different platforms and languages.
 
@@ -51,7 +59,19 @@ Node library for Kafka: https://www.npmjs.com/package/kafka-node
 
 More info: https://github.com/spotify/docker-kafka/pull/64/files
 
-### How to test Kafka
+#### How to test Kafka
+
+**Start a producer (in a new terminal window)**
+
+```
+docker run -it --rm --link kafka spotify/kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-console-producer.sh --broker-list kafka:9092 --topic test
+```
+
+**Start a consumer (in a new terminal window)**
+
+```
+docker run -it --rm --link kafka spotify/kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic test --from-beginning
+```
 
 
 ### Facebook Messenger
