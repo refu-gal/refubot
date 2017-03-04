@@ -24,17 +24,18 @@ const idsClient = new kafka.Client(KAFKA_ADDRESS);
 const producer = new kafka.Producer(client);
 
 producer.on('ready', () => {
-  // Create topics
   producer.createTopics([
-    KAFKA_IDS_TOPIC,
-    KAFKA_IN_TOPIC,
     KAFKA_OUT_TOPIC,
-  ], false, (err, data) => {
-    if (err) { console.error(err); }
-    console.log('Creating kafka topics');
-    console.log(data);
-  })
+    KAFKA_IN_TOPIC,
+    KAFKA_IDS_TOPIC,
+  ], (err, data) => {
+    if (err) console.error(err);
+    console.log('Topics created');
+    setTimeout(startBot, 5000);
+  });
+});
 
+const startBot = () => {
   // Initialize chat ids
   let chatids = [];
 
@@ -108,5 +109,5 @@ producer.on('ready', () => {
       console.error(err);
       bot.sendMessage('Sorry I\'ve problems to interact with the server');
     }
-  }
-});
+  };
+};

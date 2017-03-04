@@ -27,7 +27,8 @@ services:
       - ./kafka/:/app
     command: bash -c "chmod +x kafka.sh && ./kafka.sh"
     environment:
-      ADVERTISED_PORT: 9092
+      - ADVERTISED_PORT=9092
+      - AUTO_CREATE_TOPICS=true
     working_dir: /app
     ports:
       - "2181:2181"
