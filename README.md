@@ -34,8 +34,7 @@ TBC
 
 ### Telegram
 
-
-TBC
+Telegram bot implementation
 
 ### SMS
 
@@ -44,4 +43,3 @@ TBC
 ### Others
 
 TBC
-
