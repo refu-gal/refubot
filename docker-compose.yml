@@ -1,0 +1,20 @@
+version: '2'
+
+services:
+  api:
+    image: node:latest
+    environment:
+      - PORT=3000
+    volumes:
+      - ./telegram/:/app
+    command: npm start
+    working_dir: /app
+    ports:
+      - "3000:3000"
+  kafka:
+    image: spotify/kafka
+    environment:
+      ADVERTISED_PORT: 9092
+    ports:
+      - "2181:2181"
+      - "9092:9092"
