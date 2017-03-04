@@ -4,6 +4,7 @@
   "description": "This API provides the Telegram implementatio to refubot",
   "main": "server.js",
   "scripts": {
+    "prestart": "npm install --silent",
     "start": "node server.js"
   },
   "keywords": [],
