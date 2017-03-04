@@ -2,7 +2,11 @@
 
 ## Requirements
 
-You will need to have [docker](https://www.docker.io/gettingstarted/#h_installation) and [docker compose](http://docs.docker.com/compose/install/).
+You will need to have:
+
+ - [docker](https://www.docker.io/gettingstarted/#h_installation)
+ - [docker compose](http://docs.docker.com/compose/install/).
+ - [jq](https://stedolan.github.io/jq/)
 
 ## How to start?
 
