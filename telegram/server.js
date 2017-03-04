@@ -6,6 +6,12 @@ const options = {
 };
 const bot = new TelegramBot(TOKEN, options);
 
+bot.onText(/\/MeHacesUnaRebajita/, function onPhotoText(msg) {
+  // From file path
+  var resp = "Claro que sí guapi ❤❤❤";
+  bot.sendMessage(msg.chat.id, resp);
+});
+
 // Matches /photo
 bot.onText(/\/photo/, function onPhotoText(msg) {
   // From file path
