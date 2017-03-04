@@ -3,6 +3,7 @@
 ## The team
 
 - @antonmry: developing the backend system and the comunication between the different platforms.
+- @danybmx: developing the telegram bot
 
 ## Requirements
 
