@@ -83,7 +83,11 @@ Telegram bot implementation
 
 ### SMS
 
-TBC
+Our number is +34 986080052.
+
+To send/receive an SMS:
+
+https://docs.nexmo.com/messaging/sms-api
 
 ### Others
 
