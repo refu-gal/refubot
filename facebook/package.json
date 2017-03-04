@@ -1,18 +1,19 @@
 {
   "name": "messenger-get-started",
   "version": "1.0.0",
-  "description": "Get started example for Messenger Platform",
+  "description": "This API provides the Facebook Messenger implementation to refubot",
   "main": "app.js",
   "scripts": {
+    "prestart": "npm install",	
     "start": "node app.js",
     "lint": "jshint --exclude node_modules .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/fbsamples/messenger-platform-samples.git"
+    "url": "https://github.com/refu-gal/refubot.git"
   },
-  "author": "Facebook",
+  "author": "Refugal",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.15.0",
