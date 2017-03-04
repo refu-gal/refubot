@@ -1,7 +1,7 @@
 version: '2'
 
 services:
-  api:
+  telegram:
     image: node:latest
     environment:
       - PORT=3000
@@ -11,6 +11,16 @@ services:
     working_dir: /app
     ports:
       - "3000:3000"
+  facebook:
+    image: node:latest
+    environment:
+      - PORT=3000
+    volumes:
+      - ./facebook/:/app
+    command: npm start
+    working_dir: /app
+    ports:
+      - "5000:5000"
   kafka:
     image: spotify/kafka
     environment:
