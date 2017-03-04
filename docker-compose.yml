@@ -14,7 +14,7 @@ services:
   facebook:
     image: node:latest
     environment:
-      - PORT=3000
+      - PORT=5000
     volumes:
       - ./facebook/:/app
     command: npm start
