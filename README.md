@@ -1,5 +1,9 @@
 # Galibot
 
+## The team
+
+- @antonmry: developing the backend system and the comunication between the different platforms.
+
 ## Requirements
 
 You will need to have:
