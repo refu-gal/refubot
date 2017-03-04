@@ -225,6 +225,7 @@ function receivedMessage(event) {
     senderID, recipientID, timeOfMessage);
   console.log(JSON.stringify(message));
 
+ //Mensaje de la propia pagina	
   var isEcho = message.is_echo;
   var messageId = message.mid;
   var appId = message.app_id;
