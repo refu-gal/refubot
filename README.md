@@ -17,11 +17,19 @@ docker-compose up
 
 All the messaging clients will subscribe/publish to kafka, so we can abstract all the logic from the different platforms and languages.
 
+We initially will have two topics:
+
+- Telegram
+- Facebook
+
+Node library for Kafka: https://www.npmjs.com/package/kafka-node
+
 ### Facebook Messenger
 
 TBC
 
 ### Telegram
+
 
 TBC
 
