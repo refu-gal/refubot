@@ -1,91 +1,45 @@
-const TOKEN = process.env.TELEGRAM_TOKEN || '364419216:AAEe1tszpIxOWSLVDNXRs4_3GBUUqsocFCM';
 const TelegramBot = require('node-telegram-bot-api');
 const request = require('request');
+const kafka = require('kafka-node');
+
+// Bot token
+const TOKEN = process.env.TELEGRAM_TOKEN || '364419216:AAEe1tszpIxOWSLVDNXRs4_3GBUUqsocFCM';
+const KAFKA_ADDRESS = process.env.KAFKA_ADDRESS || 'localhost:2181'
+const KAFKA_OUT_TOPIC = 'telegram_out'
+const KAFKA_IN_TOPIC = 'telegram_in'
+
+// Bot options
 const options = {
   polling: true
 };
+
+// Initialize the bot
 const bot = new TelegramBot(TOKEN, options);
 
-bot.onText(/\/MeHacesUnaRebajita/, function onPhotoText(msg) {
-  // From file path
-  var resp = "Claro que sí guapi ❤❤❤";
-  bot.sendMessage(msg.chat.id, resp);
-});
+// Initialize kafka
+const client = new kafka.Client(KAFKA_ADDRESS);
+const producer = new kafka.Producer(client);
 
-// Matches /photo
-bot.onText(/\/photo/, function onPhotoText(msg) {
-  // From file path
-  const photo = `${__dirname}/../test/data/photo.gif`;
-  bot.sendPhoto(msg.chat.id, photo, {
-    caption: "I'm a bot!"
+// Handle alarm messages
+bot.onText(/alarm (.*)/, (msg, match) => {
+  bot.sendMessage(msg.chat.id, 'Thanks I\'ll comunicate that to other people!');
+  chatid = msg.chat.id;
+  producer.send([
+    {
+      topic: KAFKA_IN_TOPIC,
+      messages: [ match[1] ],
+    }
+  ], (err) => {
+    if (err) {
+      bot.sendMessage(msg.chat.id, 'Sorry I\'m having problems to talk with our server');
+    }
   });
 });
 
-
-// Matches /audio
-bot.onText(/\/audio/, function onAudioText(msg) {
-  // From HTTP request
-  const url = 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg';
-  const audio = request(url);
-  bot.sendAudio(msg.chat.id, audio);
-});
-
-
-// Matches /love
-bot.onText(/\/love/, function onLoveText(msg) {
-  const opts = {
-    reply_to_message_id: msg.message_id,
-    reply_markup: JSON.stringify({
-      keyboard: [
-        ['Yes, you are the bot of my life ❤'],
-        ['No, sorry there is another one...']
-      ]
-    })
-  };
-  bot.sendMessage(msg.chat.id, 'Do you love me?', opts);
-});
-
-
-// Matches /echo [whatever]
-bot.onText(/\/echo (.+)/, function onEchoText(msg, match) {
-  const resp = match[1];
-  bot.sendMessage(msg.chat.id, resp);
-});
-
-
-// Matches /editable
-bot.onText(/\/editable/, function onEditableText(msg) {
-  const opts = {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: 'Edit Text',
-             // we shall check for this value when we listen
-             // for "callback_query"
-            callback_data: 'edit'
-          }
-        ]
-      ]
-    }
-  };
-  bot.sendMessage(msg.from.id, 'Original Text', opts);
-});
-
-
-// Handle callback queries
-bot.on('callback_query', function onCallbackQuery(callbackQuery) {
-  const action = callbackQuery.data;
-  const msg = callbackQuery.message;
-  const opts = {
-    chat_id: msg.chat.id,
-    message_id: msg.message_id,
-  };
-  let text;
-
-  if (action === 'edit') {
-    text = 'Edited Text';
-  }
-
-  bot.editMessageText(text, opts);
+// Handle messages coming from kafka "telegram_out" topic
+const consumer = new kafka.Consumer(client, [{
+  topic: KAFKA_OUT_TOPIC,
+}]);
+consumer.on('message', (message) => {
+  bot.sendMessage(chatid, message.value);
 });
