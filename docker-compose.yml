@@ -23,8 +23,12 @@ services:
       - "5000:5000"
   kafka:
     image: spotify/kafka
+    volumes:
+      - ./kafka/:/app
+    command: bash -c "chmod +x kafka.sh && ./kafka.sh"
     environment:
       ADVERTISED_PORT: 9092
+    working_dir: /app
     ports:
       - "2181:2181"
       - "9092:9092"
