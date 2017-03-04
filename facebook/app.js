@@ -10,6 +10,25 @@
 /* jshint node: true, devel: true */
 'use strict';
 
+//Securizacion
+var le = require('greenlock').create({ server: 'staging' });
+
+var opts = {
+  domains: ['localhost'], email: 'user@email.com', agreeTos: true
+};
+
+le.register(opts).then(function (certs) {
+  console.log(certs);
+  // privkey, cert, chain, expiresAt, issuedAt, subject, altnames
+}, function (err) {
+  console.error(err);
+});
+
+/*
+var app = express();
+app.use('/', le.middleware());
+*/
+
 const 
   bodyParser = require('body-parser'),
   config = require('config'),

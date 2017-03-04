@@ -24,19 +24,30 @@ const idsClient = new kafka.Client(KAFKA_ADDRESS);
 const producer = new kafka.Producer(client);
 
 producer.on('ready', () => {
-  // Create topics
   producer.createTopics([
-    KAFKA_IDS_TOPIC,
-    KAFKA_IN_TOPIC,
     KAFKA_OUT_TOPIC,
-  ], false, (err, data) => {
-    if (err) { console.error(err); }
-    console.log('Creating kafka topics');
-    console.log(data);
-  })
+    KAFKA_IN_TOPIC,
+    KAFKA_IDS_TOPIC,
+  ], (err, data) => {
+    if (err) console.error(err);
+    console.log('Topics created');
+    setTimeout(startBot, 5000);
+  });
+});
 
+const startBot = () => {
   // Initialize chat ids
   let chatids = [];
+
+  // Handle register messages
+  bot.onText(/help/, (msg) => {
+    // Send feedback to the user
+
+    const opts = {
+      parse_mode: "markdown"
+    };
+    bot.sendMessage(msg.chat.id, 'Welcome, to @refubot: \n You can control me by sending these *commands*:  \n/register - register to receive new alerts \n/alarm - send a new alarm', opts);
+  });
 
   // Handle register messages
   bot.onText(/register/, (msg) => {
@@ -108,5 +119,5 @@ producer.on('ready', () => {
       console.error(err);
       bot.sendMessage('Sorry I\'ve problems to interact with the server');
     }
-  }
-});
+  };
+};
