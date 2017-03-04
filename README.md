@@ -30,7 +30,11 @@ docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookee
 docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic facebook_out
 ```
 
+Add kafka to /etc/hosts:
 
+```
+127.0.0.1   kafka
+```
 
 ## Modules
 
