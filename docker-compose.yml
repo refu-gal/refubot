@@ -3,6 +3,8 @@ version: '2'
 services:
   telegram:
     image: node:latest
+    depends_on:
+      - kafka
     environment:
       - PORT=3000
     volumes:
@@ -13,6 +15,8 @@ services:
       - "3000:3000"
   facebook:
     image: node:latest
+    depends_on:
+      - kafka
     environment:
       - PORT=5000
     volumes:
@@ -21,6 +25,7 @@ services:
     working_dir: /app
     ports:
       - "5000:5000"
+      - "5001:5001"
   kafka:
     image: spotify/kafka
     volumes:
