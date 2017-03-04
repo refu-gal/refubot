@@ -40,6 +40,16 @@ const startBot = () => {
   let chatids = [];
 
   // Handle register messages
+  bot.onText(/help/, (msg) => {
+    // Send feedback to the user
+
+    const opts = {
+      parse_mode: "markdown"
+    };
+    bot.sendMessage(msg.chat.id, 'Welcome, to @refubot: \n You can control me by sending these *commands*:  \n/register - register to receive new alerts \n/alert - send a new alert', opts);
+  });
+
+  // Handle register messages
   bot.onText(/register/, (msg) => {
     // Send the id to the kafka topic
     producer.send([
