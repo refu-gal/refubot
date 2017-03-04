@@ -1,18 +1,17 @@
 // Dependencies
 const TelegramBot = require('node-telegram-bot-api');
-const request = require('request');
 const kafka = require('kafka-node');
 
 // Bot token
 const TOKEN = process.env.TELEGRAM_TOKEN || '364419216:AAEe1tszpIxOWSLVDNXRs4_3GBUUqsocFCM';
-const KAFKA_ADDRESS = process.env.KAFKA_ADDRESS || 'kafka:2181'
-const KAFKA_OUT_TOPIC = process.env.KAFKA_OUT_TOPIC || 'telegram_out'
-const KAFKA_IN_TOPIC = process.env.KAFKA_IN_TOPIC || 'telegram_in'
-const KAFKA_IDS_TOPIC = process.env.KAFKA_IDS_TOPIC || 'telegram_ids'
+const KAFKA_ADDRESS = process.env.KAFKA_ADDRESS || 'kafka:2181';
+const KAFKA_OUT_TOPIC = process.env.KAFKA_OUT_TOPIC || 'telegram_out';
+const KAFKA_IN_TOPIC = process.env.KAFKA_IN_TOPIC || 'telegram_in';
+const KAFKA_SUBSCRIBERS_TOPIC = process.env.KAFKA_SUBSCRIBERS_TOPIC || 'subscribers';
 
 // Bot options
 const options = {
-  polling: true
+  polling: true,
 };
 
 // Initialize the bot
@@ -20,104 +19,93 @@ const bot = new TelegramBot(TOKEN, options);
 
 // Initialize kafka
 const client = new kafka.Client(KAFKA_ADDRESS);
-const idsClient = new kafka.Client(KAFKA_ADDRESS);
 const producer = new kafka.Producer(client);
 
 producer.on('ready', () => {
   producer.createTopics([
     KAFKA_OUT_TOPIC,
     KAFKA_IN_TOPIC,
-    KAFKA_IDS_TOPIC,
+    KAFKA_SUBSCRIBERS_TOPIC,
   ], (err, data) => {
     if (err) console.error(err);
-    console.log('Topics created');
+    console.info('Topics created, waiting 5 seconds before start the bot');
     setTimeout(startBot, 5000);
   });
 });
 
 const startBot = () => {
-  // Initialize chat ids
-  let chatids = [];
+  console.info('Starting bot...');
+
+  // Default bot message options
+  const messageOptions = {
+    parse_mode: 'markdown',
+  };
 
   // Handle register messages
-  bot.onText(/help/, (msg) => {
+  bot.onText(/^\/?(help|start)$/, (msg) => {
     // Send feedback to the user
-
-    const opts = {
-      parse_mode: "markdown"
-    };
-    bot.sendMessage(msg.chat.id, 'Welcome, to @refubot: \n You can control me by sending these *commands*:  \n/register - register to receive new alerts \n/alarm - send a new alarm', opts);
+    bot.sendMessage(msg.chat.id, '' +
+      'Welcome, to @refubot:\n' +
+      'You can control me by sending these *commands*:\n' +
+      '/register *country* - register to a country channel to receive new alerts\n' +
+      '/alarm *country* *message* - send a new alarm to a country channel\n' +
+      '/help - show this help'
+    , messageOptions);
   });
 
   // Handle register messages
-  bot.onText(/register/, (msg) => {
-    // Send the id to the kafka topic
+  bot.onText(/^\/?register ([a-zA-Z0-9]*)$/, (msg, match) => {
+    const channel = match[1].toLowerCase();
+
     producer.send([
       {
-        topic: KAFKA_IDS_TOPIC,
-        messages: [msg.chat.id],
+        topic: KAFKA_SUBSCRIBERS_TOPIC,
+        messages: JSON.stringify({
+          channel: channel,
+          platform: 'telegram',
+          id: msg.chat.id,
+        }),
       },
     ], errorHandler);
 
     // Send feedback to the user
-    bot.sendMessage(msg.chat.id, 'Welcome, you\'re in!!');
+    bot.sendMessage(msg.chat.id, '👂 You\'re subscribed to *#' + channel +'* channel now!', messageOptions);
   });
 
   // Handle alarm messages
-  bot.onText(/alarm (.*)/, (msg, match) => {
+  bot.onText(/^\/?alarm ([a-zA-Z0-9]*) (.*)/, (msg, match) => {
     // Send feedback to the user
-    bot.sendMessage(msg.chat.id, 'Thanks I\'ll comunicate that to other people!');
+    bot.sendMessage(msg.chat.id, '👍 Thanks I\'ll comunicate that to other refugees!', messageOptions);
 
     // Send message to the kafka topic
     producer.send([
       {
         topic: KAFKA_IN_TOPIC,
-        messages: [ msg.chat.id + '@@@' + match[1] ],
+        messages: JSON.stringify({
+          id: msg.chat.id,
+          channel: match[1],
+          message: match[2],
+        }),
       },
     ], errorHandler);
   });
 
   // Handle messages coming from kafka "telegram_out" topic
-  const consumer = new kafka.Consumer(client, [
-    {
-      topic: KAFKA_IN_TOPIC,
-    }
-  ]);
+  const consumer = new kafka.Consumer(client, [{
+    topic: KAFKA_OUT_TOPIC,
+  }]);
   consumer.on('message', (message) => {
-    const cid = message.value.split('@@@')[0]
-    message = message.value.split('@@@')[1];
-
-    let sentTo = 0;
-    for (var x = 0; x < chatids.length; x++) {
-      if (chatids[x] !== cid) {
-        sentTo++;
-        bot.sendMessage(chatids[x], message);
-      }
+    const data = JSON.parse(message.value);
+    if (data.id) {
+      bot.sendMessage(data.id, '❗️ ' + data.message);
     }
-
-    bot.sendMessage(cid, 'You\'re message has been sent to ' + sentTo + ' refugees');
-  });
-
-  // Handle messages coming from kafka that register new chatids
-  const idsConsumer = new kafka.Consumer(idsClient, [
-    {
-      topic: KAFKA_IDS_TOPIC,
-      offset: 0,
-      position: 0,
-    }
-  ], {
-    autoCommit: true,
-  });
-  idsConsumer.on('message', (message) => {
-    console.log('Registered new user');
-    chatids.push(message.value);
   });
 
   // Error handler for the bot
   const errorHandler = (err) => {
     if (err) {
       console.error(err);
-      bot.sendMessage('Sorry I\'ve problems to interact with the server');
+      bot.sendMessage('😞 Sorry I\'ve problems to talk with the server ');
     }
   };
 };

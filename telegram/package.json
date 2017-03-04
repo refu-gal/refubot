@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "prestart": "npm install",
-    "start": "node server.js",
+    "start": "node main.js",
     "dev": "nodemon server.js --watch ./"
   },
   "keywords": [],
