@@ -46,7 +46,7 @@ const startBot = () => {
     const opts = {
       parse_mode: "markdown"
     };
-    bot.sendMessage(msg.chat.id, 'Welcome, to @refubot: \n You can control me by sending these *commands*:  \n/register - register to receive new alerts \n/alert - send a new alert', opts);
+    bot.sendMessage(msg.chat.id, 'Welcome, to @refubot: \n You can control me by sending these *commands*:  \n/register - register to receive new alerts \n/alarm - send a new alarm', opts);
   });
 
   // Handle register messages
