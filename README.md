@@ -10,10 +10,23 @@ You will need to have:
 
 ## How to start?
 
+Start kafka:
+
 ```
-cd kafka
-docker-compose up
+docker pull spotify/kafka
+docker run -d -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=kafka --env ADVERTISED_PORT=9092 --name kafka spotify/kafka
 ```
+
+Create topics:
+
+```
+docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic telegram_in
+docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic telegram_out
+docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic facebook_in
+docker exec kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic facebook_out
+```
+
+
 
 ## Modules
 
@@ -27,6 +40,11 @@ We initially will have two topics:
 - Facebook
 
 Node library for Kafka: https://www.npmjs.com/package/kafka-node
+
+More info: https://github.com/spotify/docker-kafka/pull/64/files
+
+### How to test Kafka
+
 
 ### Facebook Messenger
 
