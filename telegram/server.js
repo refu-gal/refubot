@@ -23,6 +23,17 @@ const client = new kafka.Client(KAFKA_ADDRESS);
 const idsClient = new kafka.Client(KAFKA_ADDRESS);
 const producer = new kafka.Producer(client);
 
+// Create topics
+producer.createTopics([
+  KAFKA_IDS_TOPIC,
+  KAFKA_IN_TOPIC,
+  KAFKA_OUT_TOPIC,
+], false, (err, data) => {
+  if (err) { console.error(err); }
+  console.log('Creating kafka topics');
+  console.log(data);
+})
+
 // Initialize chat ids
 let chatids = [];
 
