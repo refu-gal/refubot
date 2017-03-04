@@ -10,25 +10,6 @@
 /* jshint node: true, devel: true */
 'use strict';
 
-//Securizacion
-var le = require('greenlock').create({ server: 'staging' });
-
-var opts = {
-  domains: ['localhost'], email: 'user@email.com', agreeTos: true
-};
-
-le.register(opts).then(function (certs) {
-  console.log(certs);
-  // privkey, cert, chain, expiresAt, issuedAt, subject, altnames
-}, function (err) {
-  console.error(err);
-});
-
-/*
-var app = express();
-app.use('/', le.middleware());
-*/
-
 const 
   bodyParser = require('body-parser'),
   config = require('config'),
@@ -37,11 +18,28 @@ const
   https = require('https'),  
   request = require('request');
 
+//Securizacion
 var app = express();
-app.set('port', process.env.PORT || 5000);
+
+require('greenlock-express').create({
+
+  server: 'staging'
+
+, email: 'john.doe@example.com'
+
+, agreeTos: true
+
+, approveDomains: [ 'example.com' ]
+
+, app: app
+
+});
+
+//var app = express();
+/*app.set('port', process.env.PORT || 5000);
 app.set('view engine', 'ejs');
 app.use(bodyParser.json({ verify: verifyRequestSignature }));
-app.use(express.static('public'));
+app.use(express.static('public'));*/
 
 /*
  * Be sure to setup your config values before running this code. You can 
@@ -847,12 +845,7 @@ function callSendAPI(messageData) {
   });  
 }
 
-// Start server
-// Webhooks must be available via SSL with a certificate signed by a valid 
-// certificate authority.
-app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
-});
 
-module.exports = app;
+app.listen(80, 5000);
+module.exports = app;app
 
