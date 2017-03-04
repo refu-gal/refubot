@@ -1,6 +1,6 @@
 {
-    "appSecret": "",
-    "pageAccessToken": "",
-    "validationToken": "",
-    "serverURL": ""
+    "appSecret": "EAASKZCJzlpXQBAJR63iSJyCJaPd5Gs9rASdWWvBGaKak2d0z9eDtQWuspCP32TEryejZCKeek4rRnzBqkrxMuyVU1P4tAYzqE17JJZBMZBhsFGbXK4B5vtOYv08hJagwRTA2PkpDbH2lpsetVFaZCNVazBO6YZAEJjxzywsZBDRZBgZDZD",
+    "pageAccessToken": "10155202407989916",
+    "validationToken": "test",
+    "serverURL": "kafka:2181"
 }
