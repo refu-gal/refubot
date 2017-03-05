@@ -363,8 +363,8 @@ function sendTextMessage(recipientId, messageText) {
   };
 
   // Send message to the kafka topic
-  var r  = messageText.match(re);
-  if(r) {
+  //var r  = messageText.match(re);
+  
 	producer.send([
       {
         topic: KAFKA_IN_TOPIC,
@@ -375,7 +375,8 @@ function sendTextMessage(recipientId, messageText) {
         }),
       },
     ], errorHandler);
-  }
+ 
+
  	//Mensaje de respuesta al usuario  
  	var messageDataResponse = {
     recipient: {
@@ -385,16 +386,18 @@ function sendTextMessage(recipientId, messageText) {
       text: '👍 Thanks I\'ll comunicate that to other refugees!',
       metadata: "DEVELOPER_DEFINED_METADATA"
     }
-  };
+    };
+
     //Sigo usando echo para comprobar comunicacion	  
     callSendAPI(messageData);
-    //Mando mensaje a la cola    
+    //Mando mensaje de respuesta la usuario    
     callSendAPI(messageDataResponse);
     
-     // Handle messages coming from kafka "telegram_out" topic
+     // Handle messages coming from kafka "facebook_out" topic
     const consumer = new kafka.Consumer(client, [{
-    topic: KAFKA_OUT_TOPIC,
+        topic: KAFKA_OUT_TOPIC,
     }]);
+    
     consumer.on('message', (message) => {
     const data = JSON.parse(message.value);
         
@@ -406,23 +409,12 @@ function sendTextMessage(recipientId, messageText) {
       text: message,
       metadata: "DEVELOPER_DEFINED_METADATA"
     }
-  };    
-     callSendAPI(messageDataQueue);    
-        
- /*   if (data.id) {
-      bot.sendMessage(data.id, data.message, {
-        parse_mode: 'markdown',
-      });
-    }*/
+  }; 
+    console.log("Mensaje %s para %s",message, recipientId);
+         callSendAPI(messageDataQueue);    
         
     });
-
-
-  	
-
 }
-
-
 
 /*
  * Send a message with the account linking call-to-action
