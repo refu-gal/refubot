@@ -20,12 +20,12 @@ const
 var app = express();
 
 greenlock.create({
-  server: 'staging',
+  server: 'https://acme-v01.api.letsencrypt.org/directory',
   email: 'daniel@dpstudios.es',
   agreeTos: true,
   approveDomains: [ 'refubot.vigojug.org' ],
   app: app
-}).listen(5001, 443);
+}).listen(5001, 5000);
 
 // Serve static
 app.use(express.static('public'));
