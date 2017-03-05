@@ -408,19 +408,18 @@ function sendTextMessage(recipientId, messageText) {
     }]);
     
     consumer.on('message', (message) => {
-    const data = JSON.parse(message.value);
-        
+    const data = JSON.parse(message.value);    
     var messageDataQueue = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      text: message,
-      metadata: "DEVELOPER_DEFINED_METADATA"
-    }
+        recipient: {
+          id: recipientId
+        },
+        message: {
+          text: message,
+          metadata: "DEVELOPER_DEFINED_METADATA"
+        }
   }; 
     console.log("Mensaje %s para %s",message, recipientId);
-         callSendAPI(messageDataQueue);    
+    callSendAPI(messageDataQueue);    
         
     });
 }
