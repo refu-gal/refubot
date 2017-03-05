@@ -49,7 +49,7 @@ producer.on('ready', () => {
 const startBot = () => {
   console.info('Starting bot...');
 
-  db.run('CREATE TABLE if not exists register (platform TEXT, platformId TEXT, topic TEXT, PRIMARY KEY(platformId, topic))');
+  db.run('CREATE TABLE if not exists register (platform TEXT, platformId TEXT, topic TEXT, PRIMARY KEY(platform, platformId, topic))');
 
   const getRegisteredOnTopic = (topic, callback) => {
     db.all(`SELECT * from register where topic = '${topic}'`, (err, rows) => {
