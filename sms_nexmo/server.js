@@ -56,6 +56,14 @@ function handleParams(params, res) {
   res.status(200).end();
 }
 
+// Initialize Nexmo
+var nexmo = new NexmoBot({
+  apiKey: config.API_KEY,
+  apiSecret: config.API_SECRET
+},
+{debug: config.DEBUG}
+);
+
 // Initialize kafka
 const client = new kafka.Client(KAFKA_ADDRESS);
 const producer = new kafka.Producer(client);
@@ -71,8 +79,17 @@ const startBot = () => {
     const data = JSON.parse(message.value);
     console.log('Received message in sms_out');
 
-    // Here we should send SMS to the user
-
+    // Here we should send SMS to the final user
+    nexmo.message.sendSms(
+      'refubot', '34616169540', 'testing refugal',
+        (err, responseData) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.dir(responseData);
+          }
+        }
+     );
 
   });
 
@@ -84,21 +101,4 @@ const startBot = () => {
   };
 };
 
-var nexmo = new NexmoBot({
-  apiKey: config.API_KEY,
-  apiSecret: config.API_SECRET
-},
-{debug: config.DEBUG}
-);
 
-nexmo.message.sendSms(
-//  config.FROM_NUMBER, '34616169540', 'testing refugal',
-  'refubot', '34616169540', 'testing refugal',
-    (err, responseData) => {
-      if (err) {
-        console.log(err);
-      } else {
-        console.dir(responseData);
-      }
-    }
- );
