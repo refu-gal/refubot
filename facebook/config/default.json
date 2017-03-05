@@ -1,6 +1,6 @@
 {
-    "appSecret": "EAASKZCJzlpXQBAJR63iSJyCJaPd5Gs9rASdWWvBGaKak2d0z9eDtQWuspCP32TEryejZCKeek4rRnzBqkrxMuyVU1P4tAYzqE17JJZBMZBhsFGbXK4B5vtOYv08hJagwRTA2PkpDbH2lpsetVFaZCNVazBO6YZAEJjxzywsZBDRZBgZDZD",
-    "pageAccessToken": "10155202407989916",
+    "appSecret": "ee2b6ba6feef3fb05737a1cb9a461ef2",
+    "pageAccessToken": "EAASKZCJzlpXQBAMaQYde1fId6Cf9KmcukA8lnW0CsYy9KMTiI81u6ZBWIxzH3Aa1TC5qEPZCHNCtgvFn5ZCaBdCHBHfZCdRhgYHAPGmJrdiMQv9xOHD3Kz06ZBF58G6p3ZCSgsht8xXrR3BEQrvXCPFZAwyZAih3aaBJc0gx9ONPRywZDZD",
     "validationToken": "test",
-    "serverURL": "https://refubot.vigojug.org:5000"
+    "serverURL": "https://bot.galiglobal.com/"
 }
