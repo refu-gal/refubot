@@ -3,20 +3,25 @@ const kafka = require('kafka-node');
 
 // Bot token
 const KAFKA_ADDRESS = process.env.KAFKA_ADDRESS || 'kafka:2181';
-const KAFKA_LIST_TOPIC = 'topic_list';
 const services = {
- telegram: {
-   topics: {
-     in: 'telegram_in',
-     out: 'telegram_out',
-   },
- },
- facebook: {
-   topics: {
-     in: 'facebook_in',
-     out: 'facebook_out',
-   },
- },
+  telegram: {
+    topics: {
+      in: 'telegram_in',
+      out: 'telegram_out',
+    },
+  },
+  facebook: {
+    topics: {
+      in: 'facebook_in',
+      out: 'facebook_out',
+    },
+  },
+  sms: {
+    topics: {
+      in: 'sms_in',
+      out: 'sms_out',
+    },
+  },
 };
 
 // Initialize kafka
@@ -28,86 +33,106 @@ const db = new sqlite3.Database('refubot.db');
 
 
 producer.on('ready', () => {
- let topics = [KAFKA_LIST_TOPIC];
- for (const key in services) {
-   if (!services.hasOwnProperty(key)) continue;
-   const service = services[key];
-   topics.push(service.topics.in);
- }
+  let topics = [];
+  for (const key in services) {
+    if (!services.hasOwnProperty(key)) continue;
+    const service = services[key];
+    topics.push(service.topics.in);
+  }
 
- producer.createTopics(topics, (err, data) => {
-   if (err) console.error(err);
-   startBot();
- });
+  producer.createTopics(topics, (err, data) => {
+    if (err) console.error(err);
+    startBot();
+  });
 });
 
 const startBot = () => {
- console.info('Starting bot...');
- db.run("CREATE TABLE if not exists register (platform TEXT, platformId TEXT, topic TEXT, PRIMARY KEY (platform, platformId, topic))");
+  console.info('Starting bot...');
 
- const getRegisteredOnTopic = (topic,callback) => {
-   db.all("SELECT * from register where topic = ?", topic,function(err,rows){
-     for (i =0; i<rows.length; i++) console.log(JSON.stringify(rows[i]));
+  db.run('CREATE TABLE if not exists register (platform TEXT, platformId TEXT, topic TEXT, PRIMARY KEY(platform, platformId, topic))');
+
+  const getRegisteredOnTopic = (topic, callback) => {
+    db.all(`SELECT * from register where topic = '${topic}'`, (err, rows) => {
+      if (err) errorHandler(err);
+      callback(rows);
+    });
+  };
+
+  const registerInTopic = (platform, platformId, topic) => {
+    db.run(`INSERT OR REPLACE INTO register(platform, platformId, topic) VALUES ('${platform}', '${platformId}', '${topic}')`);
+  };
+
+  let topics = [];
+  for (const key in services) {
+    if (!services.hasOwnProperty(key)) continue;
+    const service = services[key];
+    topics.push({topic: service.topics.in});
+  }
+
+  // Handle messages coming from kafka service in topic
+  const consumer = new kafka.Consumer(client, topics);
+  consumer.on('message', (message) => {
+    const data = JSON.parse(message.value);
+
+    // Methods
+
+    // Register
+    if (/estoy en (.*)/.test(data.message)) {
+      const matches = data.message.match(/estoy en (.*)/);
+      const channel = matches[1].toLowerCase();
+
+      // Register in topic on the BD
+      registerInTopic(data.type, data.id, channel);
+
+      // Send message to the kafka in topic
+      return producer.send([
+        {
+          topic: services[data.type].topics.out,
+          messages: [JSON.stringify({
+            id: data.id,
+            message: 'Te has subscrito para recibir información de ' + channel,
+          })],
+        },
+      ], errorHandler);
+    }
+
+    // Alarm
+    if (/^(.*) (en|de) ([a-zA-Z0-9]*)$/.test(data.message)) {
+      const matches = data.message.match(/^(.*) (en|de) ([a-zA-Z0-9]*)$/);
+      const channel = matches[3].toLowerCase();
+
+      return getRegisteredOnTopic(channel, (recipients) => {
+        producer.send([
+          {
+            topic: services[data.type].topics.out,
+            messages: [JSON.stringify({
+              id: data.id,
+              message: `Tu mensaje ha sido enviado a ${recipients.length - 1} personas. Gracias!!`,
+            })],
+          },
+        ], errorHandler);
+
+        recipients.map((recipient) => {
+          if (recipient.platformId !== data.id) {
+            producer.send([
+              {
+                topic: services[recipient.platform].topics.out,
+                messages: [JSON.stringify({
+                  id: recipient.platformId,
+                  message: data.message,
+                })],
+              },
+            ], errorHandler);
+          }
+        });
+      });
+    };
+
+    return errorHandler('Method not found');
   });
- }
 
- const registerInTopic = (platform, platformId, topic) => {
-   var stmt = db.prepare("INSERT OR REPLACE INTO register(platform, platformId, topic) VALUES (?, ?, ?)");
-   stmt.run(platform, platformId, topic);
-   stmt.finalize();
- }
- // Hanle messages coming from kafka "topic_list" topic
- const topicsOffset = new kafka.Offset(client);
- const getTopics = (callback) => {
-   topicsOffset.fetch([
-     {
-       topic: KAFKA_LIST_TOPIC,
-       offset: 0,
-     },
-   ], (err, data) => {
-     console.log(data);
-     if (err) return callback(err, null);
-     const topics = data[KAFKA_LIST_TOPIC];
-     if (callback) callback(null, topics);
-   });
- };
-
- let topics = [];
- for (const key in services) {
-   if (!services.hasOwnProperty(key)) continue;
-   const service = services[key];
-   topics.push({topic: service.topics.in});
- }
-
- // Handle messages coming from kafka service in topic
- const consumer = new kafka.Consumer(client, topics);
- consumer.on('message', (message) => {
-   const data = JSON.parse(message.value);
-
-   if (/register (.*)/.test(data.message)) {
-     const matches = data.message.match(/register (.*)/);
-     registerInTopic("telegram", "4887206", "hola");
-     getRegisteredOnTopic("hola");
-     // Send message to the kafka in topic
-     producer.send([
-       {
-         topic: KAFKA_LIST_TOPIC,
-         messages: [matches[1]],
-       },
-     ], (err) => {
-       if (err) return errorHandler(err);
-       getTopics((err, topics) => {
-         console.log(topics);
-       });
-     });
-   }
- });
-
- // Error handler for the bot
- const errorHandler = (err) => {
-   if (err) {
-     console.error(err);
-     bot.sendMessage('😞 Lo siento pero estoy teninendo problemas para contactar con el servidor.');
-   }
- };
+  // Error handler for the bot
+  const errorHandler = (err) => {
+    if (err) console.error(err);
+  };
 };
