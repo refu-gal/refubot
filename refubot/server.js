@@ -46,7 +46,7 @@ const startBot = () => {
  db.run("CREATE TABLE if not exists register (platform TEXT, platformId TEXT, topic TEXT)");
 
  const getRegisteredOnTopic = (topic,callback) => {
-   db.all("SELECT * from register where topic ="topic,function(err,rows){
+   db.all("SELECT * from register where topic = ${topic}",function(err,rows){
      for (i =0; i<rows.length; i++) console.log(JSON.stringify(rows[i]));
   });
  }
@@ -84,7 +84,8 @@ const startBot = () => {
 
    if (/register (.*)/.test(data.message)) {
      const matches = data.message.match(/register (.*)/);
-
+     registerInTopic("telegram", "4887206", "hola");
+     getRegisteredOnTopic("hola");
      // Send message to the kafka in topic
      producer.send([
        {
