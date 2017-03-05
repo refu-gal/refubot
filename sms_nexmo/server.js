@@ -103,14 +103,12 @@ const startBot = () => {
          );
     };
   });
+};
 
-
-  // Error handler for the bot
-  const errorHandler = (err) => {
+// Error handler for the bot
+const errorHandler = (err) => {
     if (err) {
       console.error(err);
     }
-  };
 };
-
 
