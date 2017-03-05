@@ -398,9 +398,9 @@ function sendTextMessage(recipientId, messageText) {
     };
 
     //Sigo usando echo para comprobar comunicacion	  
-    callSendAPI(messageData);
+   // callSendAPI(messageData);
     //Mando mensaje de respuesta la usuario    
-    callSendAPI(messageDataResponse);
+  //  callSendAPI(messageDataResponse);
     
      // Handle messages coming from kafka "facebook_out" topic
     const consumer = new kafka.Consumer(client, [{
