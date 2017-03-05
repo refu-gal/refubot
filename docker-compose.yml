@@ -37,3 +37,11 @@ services:
     ports:
       - "2181:2181"
       - "9092:9092"
+  refubot:
+    image: node:latest
+    depends_on:
+      - kafka
+    volumes:
+      - ./refubot/:/app
+    command: npm start
+    working_dir: /app

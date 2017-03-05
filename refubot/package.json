@@ -1,0 +1,21 @@
+{
+  "name": "refubot-telegram",
+  "version": "1.0.0",
+  "description": "This API provides the Telegram implementatio to refubot",
+  "main": "server.js",
+  "scripts": {
+    "prestart": "npm install",
+    "start": "node main.js",
+    "dev": "nodemon server.js --watch ./"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "kafka-node": "^1.5.0",
+    "node-telegram-bot-api": "^0.27.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
