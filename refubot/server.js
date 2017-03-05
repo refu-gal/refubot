@@ -101,10 +101,14 @@ const startBot = () => {
       const matches = data.message.match(/^(.*) (en|de) ([a-zA-Z0-9]*)$/i);
       const channel = matches[3].toLowerCase();
 
+      console.log('RECIPIENTS:');
+
       return getRegisteredOnTopic(channel, (recipients) => {
         let count = 0;
         recipients.map((recipient) => {
-          if (recipient.platformId != data.id) {
+          if (recipient.platformId+'' !== data.id+'') {
+            console.log('SENT TO ');
+            console.log(recipient);
             producer.send([
               {
                 topic: services[recipient.platform].topics.out,
