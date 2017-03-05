@@ -31,7 +31,6 @@ const producer = new kafka.Producer(client);
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('refubot.db');
 
-
 producer.on('ready', () => {
   let topics = [];
   for (const key in services) {
@@ -72,6 +71,7 @@ const startBot = () => {
   // Handle messages coming from kafka service in topic
   const consumer = new kafka.Consumer(client, topics);
   consumer.on('message', (message) => {
+    console.log(message);
     const data = JSON.parse(message.value);
 
     // Methods
@@ -113,6 +113,8 @@ const startBot = () => {
         ], errorHandler);
 
         recipients.map((recipient) => {
+          console.log(recipient);
+          console.log(data);
           if (recipient.platformId !== data.id) {
             producer.send([
               {
