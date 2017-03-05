@@ -16,6 +16,12 @@ const services = {
       out: 'facebook_out',
     },
   },
+  sms: {
+    topics: {
+      in: 'sms_in',
+      out: 'sms_out',
+    },
+  },
 };
 
 // Initialize kafka
@@ -42,15 +48,15 @@ producer.on('ready', () => {
 
 const startBot = () => {
   console.info('Starting bot...');
-  console.info('Starting bot...');
-  db.run('CREATE TABLE if not exists register (platform TEXT, platformId TEXT, topic TEXT)');
+
+  db.run('CREATE TABLE if not exists register (platform TEXT, platformId TEXT, topic TEXT, PRIMARY KEY(platformId, topic))');
 
   const getRegisteredOnTopic = (topic, callback) => {
     db.all(`SELECT * from register where topic = '${topic}'`, (err, rows) => {
       if (err) errorHandler(err);
       callback(rows);
-   });
- };
+    });
+  };
 
   const registerInTopic = (platform, platformId, topic) => {
     db.run(`INSERT OR REPLACE INTO register(platform, platformId, topic) VALUES ('${platform}', '${platformId}', '${topic}')`);
@@ -65,7 +71,6 @@ const startBot = () => {
 
   // Handle messages coming from kafka service in topic
   const consumer = new kafka.Consumer(client, topics);
-  console.log('Listening to ' + topics);
   consumer.on('message', (message) => {
     const data = JSON.parse(message.value);
 
@@ -91,21 +96,34 @@ const startBot = () => {
       ], errorHandler);
     }
 
-    if (/(.*) en (.*)/.test(data.message)) {
-      const matches = data.message.match(/(.*) en (.*)/);
-      const channel = matches[2].toLowerCase();
+    // Alarm
+    if (/^(.*) (en|de) ([a-zA-Z0-9]*)$/.test(data.message)) {
+      const matches = data.message.match(/^(.*) (en|de) ([a-zA-Z0-9]*)$/);
+      const channel = matches[3].toLowerCase();
 
       return getRegisteredOnTopic(channel, (recipients) => {
+        producer.send([
+          {
+            topic: services[data.type].topics.out,
+            messages: [JSON.stringify({
+              id: data.id,
+              message: `Tu mensaje ha sido enviado a ${recipients.length - 1} personas. Gracias!!`,
+            })],
+          },
+        ], errorHandler);
+
         recipients.map((recipient) => {
-          producer.send([
-            {
-              topic: services[recipient.platform].topics.out,
-              messages: [JSON.stringify({
-                id: recipient.platformId,
-                message: matches[1],
-              })],
-            },
-          ], errorHandler);
+          if (recipient.platformId !== data.id) {
+            producer.send([
+              {
+                topic: services[recipient.platform].topics.out,
+                messages: [JSON.stringify({
+                  id: recipient.platformId,
+                  message: data.message,
+                })],
+              },
+            ], errorHandler);
+          }
         });
       });
     };
