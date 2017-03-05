@@ -1,0 +1,26 @@
+{
+  "name": "refubot-nexmo",
+  "version": "1.0.0",
+  "description": "This API provides the Nexmo implementation to refubot",
+  "main": "server.js",
+  "scripts": {
+    "prestart": "npm install",
+    "start": "node main.js",
+    "dev": "nodemon server.js --watch ./"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "kafka-node": "^1.5.0",
+    "nexmo": "^1.2.0",
+    "dotenv": "^2.0.0",
+    "body-parser": "^1.15.0",
+    "express": "^4.13.4"
+  },
+  "devDependencies": {
+    "eslint": "^3.17.0",
+    "eslint-config-google": "^0.7.1",
+    "nodemon": "^1.11.0"
+  }
+}
