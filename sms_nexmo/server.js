@@ -78,32 +78,30 @@ function handleParams(params, res) {
 
 
 // Send SMS
-const startBot = () => {
   console.info('Starting bot...');
 
-  // Handle messages coming from kafka "sms_out" topic
-  const consumer = new kafka.Consumer(client, [{
-    topic: KAFKA_OUT_TOPIC,
-  }]);
+// Handle messages coming from kafka "sms_out" topic
+const consumer = new kafka.Consumer(client, [{
+  topic: KAFKA_OUT_TOPIC,
+}]);
 
-  consumer.on('message', (message) => {
-    const data = JSON.parse(message.value);
-    console.log('Received message in sms_out');
+consumer.on('message', (message) => {
+  const data = JSON.parse(message.value);
+  console.log('Received message in sms_out');
 
-    if (data.id) {
-        nexmo.message.sendSms(
-          config.FROM_NUMBER, data.id, data.message,
-            (err, responseData) => {
-              if (err) {
-                console.log(err);
-              } else {
-                console.dir(responseData);
-              }
+  if (data.id) {
+      nexmo.message.sendSms(
+        config.FROM_NUMBER, data.id, data.message,
+          (err, responseData) => {
+            if (err) {
+              console.log(err);
+            } else {
+              console.dir(responseData);
             }
-         );
-    };
-  });
-};
+          }
+       );
+  };
+});
 
 // Error handler for the bot
 const errorHandler = (err) => {
