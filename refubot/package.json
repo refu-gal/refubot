@@ -13,7 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "kafka-node": "^1.5.0",
-    "node-telegram-bot-api": "^0.27.0"
+    "node-telegram-bot-api": "^0.27.0",
+    "sqlite3": "^3.1.8"
   },
   "devDependencies": {
     "eslint": "^3.17.0",
