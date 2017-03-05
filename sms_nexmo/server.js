@@ -101,8 +101,8 @@ const startBot = () => {
               }
             }
          );
-    });
-  };
+    };
+  });
 
 
   // Error handler for the bot
