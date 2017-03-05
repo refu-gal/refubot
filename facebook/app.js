@@ -25,7 +25,7 @@ greenlock.create({
   agreeTos: true,
   approveDomains: [ 'refugal.vigojug.org' ],
   app: app
-});
+}).listen(5001, 5000);
 
 // Serve static
 app.use(express.static('public'));
@@ -802,6 +802,4 @@ function callSendAPI(messageData) {
   });
 }
 
-
-app.listen(5001, 5000);
-module.exports = app;app
+module.exports = app;
