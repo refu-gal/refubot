@@ -62,7 +62,20 @@ const startBot = () => {
   };
 
   const unregisterFromTopic = (platform, platformId, topic) => {
-    db.run(`DELETE FROM register WHERE platform='${platform}' && platformId='${platformId}' && topic='${topic}'`);
+    db.run(`DELETE FROM register WHERE platform='${platform}' AND platformId='${platformId}' AND topic='${topic}'`);
+  };
+
+  const subscribedTo = (platform, platformId, callback) => {
+    db.all(`SELECT topic FROM register WHERE platform='${platform}' AND platformId='${platformId}'`, (err, rows) => {
+      if (err) errorHandler(err);
+      if (rows) {
+        let channels = [];
+        rows.map((r) => {
+          channels.push(r.topic);
+        });
+        callback(channels);
+      }
+    });
   };
 
   let topics = [];
@@ -79,6 +92,26 @@ const startBot = () => {
     const data = JSON.parse(message.value);
 
     // Methods
+
+    // Unregister
+    if (/no estoy en (.*)/i.test(data.message)) {
+      const matches = data.message.match(/estoy en (.*)/i);
+      const channel = matches[1].toLowerCase();
+
+      // Register in topic on the BD
+      unregisterFromTopic(data.type, data.id, channel);
+
+      // Send message to the kafka in topic
+      return producer.send([
+        {
+          topic: services[data.type].topics.out,
+          messages: [JSON.stringify({
+            id: data.id,
+            message: 'Ya no estás subscrito para recibir información de ' + channel,
+          })],
+        },
+      ], errorHandler);
+    }
 
     // Register
     if (/estoy en (.*)/i.test(data.message)) {
@@ -100,23 +133,20 @@ const startBot = () => {
       ], errorHandler);
     }
 
-    if (/ya no estoy en (.*)/i.test(data.message)) {
-      const matches = data.message.match(/estoy en (.*)/i);
-      const channel = matches[1].toLowerCase();
-
+    if (/donde estoy/i.test(data.message)) {
       // Register in topic on the BD
-      unregisterFromTopic(data.type, data.id, channel);
-
-      // Send message to the kafka in topic
-      return producer.send([
-        {
-          topic: services[data.type].topics.out,
-          messages: [JSON.stringify({
-            id: data.id,
-            message: 'Ya no estás subscrito para recibir información de ' + channel,
-          })],
-        },
-      ], errorHandler);
+      subscribedTo(data.type, data.id, (channels) => {
+        // Send message to the kafka in topic
+        return producer.send([
+          {
+            topic: services[data.type].topics.out,
+            messages: [JSON.stringify({
+              id: data.id,
+              message: channels.length > 0 ? 'Estás en: ' + channels.join(', ') : 'No estás subscrito a nada',
+            })],
+          },
+        ], errorHandler);
+      });
     }
 
     // Alarm
