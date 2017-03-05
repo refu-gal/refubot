@@ -1,5 +1,12 @@
 # Galibot
 
+## Usage
+
+- Subscribe to a city `estoy en vigo`
+- Unsubscribe from a city `no estoy en vigo`
+- List subscribed cities `donde estoy`
+- Create an alarm `algo está pasando en|por|a|de vigo`
+
 ## The team
 
 - @Testasliando: all the design, logo, [website](http://refubot.refu.gal) and marketing campaing.
@@ -13,8 +20,7 @@
 You will need to have:
 
  - [docker](https://www.docker.io/gettingstarted/#h_installation)
- - [docker compose](http://docs.docker.com/compose/install/).
- - [jq](https://stedolan.github.io/jq/)
+ - [docker compose](http://docs.docker.com/compose/install/)
 
 ## How to start?
 
@@ -76,32 +82,28 @@ docker run -it --rm --link kafka spotify/kafka /opt/kafka_2.11-0.10.1.0/bin/kafk
 docker run -it --rm --link kafka spotify/kafka /opt/kafka_2.11-0.10.1.0/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic test --from-beginning
 ```
 
-
 ### Facebook Messenger
 
-TBC
+Facebook bot implementation
+
+[Documentation](https://developers.facebook.com/docs/messenger-platform)
 
 ### Telegram
 
 Telegram bot implementation
 
-### SMS
+[Documentation](https://core.telegram.org/bots/api)
+
+### SMS - Nexmo
 
 Our number is +34 986080052.
 
 To send/receive an SMS:
 
-https://docs.nexmo.com/messaging/sms-api
+[Documentation](https://docs.nexmo.com/messaging/sms-api)
 
 ### AWS
 
 ```
 aws acm request-certificate --domain-name bot.galiglobal.org
 ```
-
-
-
-### Others
-
-TBC
-
