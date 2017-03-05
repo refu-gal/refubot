@@ -102,20 +102,9 @@ const startBot = () => {
       const channel = matches[3].toLowerCase();
 
       return getRegisteredOnTopic(channel, (recipients) => {
-        producer.send([
-          {
-            topic: services[data.type].topics.out,
-            messages: [JSON.stringify({
-              id: data.id,
-              message: `Tu mensaje ha sido enviado a ${recipients.length - 1} personas. Gracias!!`,
-            })],
-          },
-        ], errorHandler);
-
+        const count = 0;
         recipients.map((recipient) => {
-          console.log(recipient);
-          console.log(data);
-          if (recipient.platformId !== data.id) {
+          if (recipient.platformId != data.id) {
             producer.send([
               {
                 topic: services[recipient.platform].topics.out,
@@ -125,8 +114,19 @@ const startBot = () => {
                 })],
               },
             ], errorHandler);
+            count++;
           }
         });
+
+        producer.send([
+          {
+            topic: services[data.type].topics.out,
+            messages: [JSON.stringify({
+              id: data.id,
+              message: `Tu mensaje ha sido enviado a ${count} personas. Gracias!!`,
+            })],
+          },
+        ], errorHandler);
       });
     };
 
