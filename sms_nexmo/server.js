@@ -76,32 +76,43 @@ function handleParams(params, res) {
   res.status(200).end();
 }
 
-
-// Send SMS
-  console.info('Starting bot...');
-
-// Handle messages coming from kafka "sms_out" topic
-const consumer = new kafka.Consumer(client, [{
-  topic: KAFKA_OUT_TOPIC,
-}]);
-
-consumer.on('message', (message) => {
-  const data = JSON.parse(message.value);
-  console.log('Received message in sms_out');
-
-  if (data.id) {
-      nexmo.message.sendSms(
-        config.FROM_NUMBER, data.id, data.message,
-          (err, responseData) => {
-            if (err) {
-              console.log(err);
-            } else {
-              console.dir(responseData);
-            }
-          }
-       );
-  };
+producer.on('ready', () => {
+  producer.createTopics([
+    KAFKA_OUT_TOPIC,
+    KAFKA_IN_TOPIC,
+  ], (err, data) => {
+    if (err) console.error(err);
+    startBot();
+  });
 });
+
+const startBot = () => {
+  // Send SMS
+    console.info('Starting bot...');
+
+  // Handle messages coming from kafka "sms_out" topic
+  const consumer = new kafka.Consumer(client, [{
+    topic: KAFKA_OUT_TOPIC,
+  }]);
+
+  consumer.on('message', (message) => {
+    const data = JSON.parse(message.value);
+    console.log('Received message in sms_out');
+
+    if (data.id) {
+        nexmo.message.sendSms(
+          config.FROM_NUMBER, data.id, data.message,
+            (err, responseData) => {
+              if (err) {
+                console.log(err);
+              } else {
+                console.dir(responseData);
+              }
+            }
+         );
+    };
+  });
+};
 
 // Error handler for the bot
 const errorHandler = (err) => {
@@ -109,4 +120,3 @@ const errorHandler = (err) => {
       console.error(err);
     }
 };
-

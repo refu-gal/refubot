@@ -10,7 +10,6 @@ const TOKEN = process.env.TELEGRAM_TOKEN;
 const KAFKA_ADDRESS = process.env.KAFKA_ADDRESS || 'kafka:2181';
 const KAFKA_OUT_TOPIC = process.env.KAFKA_OUT_TOPIC || 'telegram_out';
 const KAFKA_IN_TOPIC = process.env.KAFKA_IN_TOPIC || 'telegram_in';
-const KAFKA_LIST_TOPIC = process.env.KAFKA_LIST_TOPIC || 'topic_list';
 
 // Bot options
 const options = {
@@ -28,7 +27,6 @@ producer.on('ready', () => {
   producer.createTopics([
     KAFKA_OUT_TOPIC,
     KAFKA_IN_TOPIC,
-    KAFKA_LIST_TOPIC,
   ], (err, data) => {
     if (err) console.error(err);
     startBot();
