@@ -23,8 +23,19 @@ const KAFKA_ADDRESS = process.env.KAFKA_ADDRESS || 'kafka:2181';
 const KAFKA_OUT_TOPIC = process.env.KAFKA_OUT_TOPIC || 'sms_out';
 const KAFKA_IN_TOPIC = process.env.KAFKA_IN_TOPIC || 'sms_in';
 
+// Initialize Nexmo
+var nexmo = new NexmoBot({
+  apiKey: config.API_KEY,
+  apiSecret: config.API_SECRET
+},
+{debug: config.DEBUG}
+);
 
-// HTTP Server
+// Initialize kafka
+const client = new kafka.Client(KAFKA_ADDRESS);
+const producer = new kafka.Producer(client);
+
+// Receive SMS - HTTP Server
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -49,25 +60,24 @@ function handleParams(params, res) {
       timestamp: params['message-timestamp']
     };
 
-    // TODO: Here we should copy the SMS to Kafka
+    producer.send([
+      {
+        topic: KAFKA_IN_TOPIC,
+        messages: [JSON.stringify({
+          id: params.msisdn,
+          type: 'sms',
+          message: params.text,
+        })],
+      },
+    ], errorHandler);
 
     res.send(incomingData);
   }
   res.status(200).end();
 }
 
-// Initialize Nexmo
-var nexmo = new NexmoBot({
-  apiKey: config.API_KEY,
-  apiSecret: config.API_SECRET
-},
-{debug: config.DEBUG}
-);
 
-// Initialize kafka
-const client = new kafka.Client(KAFKA_ADDRESS);
-const producer = new kafka.Producer(client);
-
+// Send SMS
 const startBot = () => {
   console.info('Starting bot...');
 
@@ -75,23 +85,24 @@ const startBot = () => {
   const consumer = new kafka.Consumer(client, [{
     topic: KAFKA_OUT_TOPIC,
   }]);
+
   consumer.on('message', (message) => {
     const data = JSON.parse(message.value);
     console.log('Received message in sms_out');
 
-    // Here we should send SMS to the final user
-    nexmo.message.sendSms(
-      'refubot', '34616169540', 'testing refugal',
-        (err, responseData) => {
-          if (err) {
-            console.log(err);
-          } else {
-            console.dir(responseData);
-          }
-        }
-     );
-
-  });
+    if (data.id) {
+        nexmo.message.sendSms(
+          config.FROM_NUMBER, data.id, data.message,
+            (err, responseData) => {
+              if (err) {
+                console.log(err);
+              } else {
+                console.dir(responseData);
+              }
+            }
+         );
+    };
+  };
 
   // Error handler for the bot
   const errorHandler = (err) => {
