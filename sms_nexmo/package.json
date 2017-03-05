@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "kafka-node": "^1.5.0",
     "nexmo": "^1.2.0",
     "dotenv": "^2.0.0",
     "body-parser": "^1.15.0",
