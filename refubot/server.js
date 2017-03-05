@@ -23,6 +23,10 @@ const services = {
 const client = new kafka.Client(KAFKA_ADDRESS);
 const producer = new kafka.Producer(client);
 
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('refubot.db');
+
+
 producer.on('ready', () => {
  let topics = [KAFKA_LIST_TOPIC];
  for (const key in services) {
@@ -39,7 +43,17 @@ producer.on('ready', () => {
 
 const startBot = () => {
  console.info('Starting bot...');
+ db.run("CREATE TABLE if not exists register (platform TEXT, platformId TEXT, topic TEXT)");
 
+ const getRegisteredOnTopic = (topic,callback) => {
+   db.all("SELECT * from register where topic ="topic,function(err,rows){
+     for (i =0; i<rows.length; i++) console.log(JSON.stringify(rows[i]));
+  });
+ }
+
+ const registerInTopic = (platform, platformId, topic) => {
+   db.run("INSERT OR REPLACE INTO register(platform, platformId, topic) VALUES (${platform}, ${platformId}, ${topic})" );
+ }
  // Hanle messages coming from kafka "topic_list" topic
  const topicsOffset = new kafka.Offset(client);
  const getTopics = (callback) => {
