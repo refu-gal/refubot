@@ -102,7 +102,7 @@ const startBot = () => {
       const channel = matches[3].toLowerCase();
 
       return getRegisteredOnTopic(channel, (recipients) => {
-        const count = 0;
+        let count = 0;
         recipients.map((recipient) => {
           if (recipient.platformId != data.id) {
             producer.send([

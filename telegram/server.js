@@ -12,8 +12,6 @@ const KAFKA_OUT_TOPIC = process.env.KAFKA_OUT_TOPIC || 'telegram_out';
 const KAFKA_IN_TOPIC = process.env.KAFKA_IN_TOPIC || 'telegram_in';
 const KAFKA_LIST_TOPIC = process.env.KAFKA_LIST_TOPIC || 'topic_list';
 
-console.log(TOKEN);
-
 // Bot options
 const options = {
   polling: true,
