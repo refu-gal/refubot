@@ -77,8 +77,8 @@ const startBot = () => {
     // Methods
 
     // Register
-    if (/estoy en (.*)/.test(data.message)) {
-      const matches = data.message.match(/estoy en (.*)/);
+    if (/estoy en (.*)/i.test(data.message)) {
+      const matches = data.message.match(/estoy en (.*)/i);
       const channel = matches[1].toLowerCase();
 
       // Register in topic on the BD
@@ -97,8 +97,8 @@ const startBot = () => {
     }
 
     // Alarm
-    if (/^(.*) (en|de) ([a-zA-Z0-9]*)$/.test(data.message)) {
-      const matches = data.message.match(/^(.*) (en|de) ([a-zA-Z0-9]*)$/);
+    if (/^(.*) (en|de) ([a-zA-Z0-9]*)$/i.test(data.message)) {
+      const matches = data.message.match(/^(.*) (en|de) ([a-zA-Z0-9]*)$/i);
       const channel = matches[3].toLowerCase();
 
       return getRegisteredOnTopic(channel, (recipients) => {
