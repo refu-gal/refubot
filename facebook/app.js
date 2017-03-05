@@ -13,14 +13,33 @@ const
   crypto = require('crypto'),
   express = require('express'),
   https = require('https'),  
-  request = require('request');
+  request = require('request'),
+  kafka = require('kafka-node'),
+  KAFKA_OUT_TOPIC = process.env.KAFKA_OUT_TOPIC || 'facebook_out',
+  KAFKA_IN_TOPIC = process.env.KAFKA_IN_TOPIC || 'facebook_in',
+  KAFKA_SUBSCRIBERS_TOPIC = process.env.KAFKA_SUBSCRIBERS_TOPIC || 'subscribers';
 
-
+var re = new RegExp('/^\/?alarm ([a-zA-Z0-9]*) (.*)/');
 var app = express();
 app.set('port', process.env.PORT || 5000);
 app.set('view engine', 'ejs');
 app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
+
+const client = new kafka.Client(KAFKA_ADDRESS);
+const producer = new kafka.Producer(client);
+
+producer.on('ready', () => {
+  producer.createTopics([
+    KAFKA_OUT_TOPIC,
+    KAFKA_IN_TOPIC,
+    KAFKA_SUBSCRIBERS_TOPIC,
+  ], (err, data) => {
+    if (err) console.error(err);
+    console.info('Topics created, waiting 5 seconds before start the bot');
+    setTimeout(startBot, 5000);
+  });
+});
 
 // App Secret can be retrieved from the App Dashboard
 const APP_SECRET = (process.env.MESSENGER_APP_SECRET) ?
@@ -238,66 +257,8 @@ function receivedMessage(event) {
   }
 
   if (messageText) {
-
-    // If we receive a text message, check to see if it matches any special
-    // keywords and send back the corresponding example. Otherwise, just echo
-    // the text we received.
-    switch (messageText) {
-      case 'image':
-        sendImageMessage(senderID);
-        break;
-
-      case 'gif':
-        sendGifMessage(senderID);
-        break;
-
-      case 'audio':
-        sendAudioMessage(senderID);
-        break;
-
-      case 'video':
-        sendVideoMessage(senderID);
-        break;
-
-      case 'file':
-        sendFileMessage(senderID);
-        break;
-
-      case 'button':
-        sendButtonMessage(senderID);
-        break;
-
-      case 'generic':
-        sendGenericMessage(senderID);
-        break;
-
-      case 'receipt':
-        sendReceiptMessage(senderID);
-        break;
-
-      case 'quick reply':
-        sendQuickReply(senderID);
-        break;
-
-      case 'read receipt':
-        sendReadReceipt(senderID);
-        break;
-
-      case 'typing on':
-        sendTypingOn(senderID);
-        break;
-
-      case 'typing off':
-        sendTypingOff(senderID);
-        break;
-
-      case 'account linking':
-        sendAccountLinking(senderID);
-        break;
-
-      default:
-        sendTextMessage(senderID, messageText);
-    }
+      sendTextMessage(senderID, messageText);
+  
   } else if (messageAttachments) {
     sendTextMessage(senderID, "Message with attachment received");
   }
@@ -387,112 +348,6 @@ function receivedAccountLink(event) {
   console.log("Received account link event with for user %d with status %s " +
     "and auth code %s ", senderID, status, authCode);
 }
-
-/*
- * Send an image using the Send API.
- */
-function sendImageMessage(recipientId) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "image",
-        payload: {
-          url: SERVER_URL + "/assets/rift.png"
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
-/*
- * Send a Gif using the Send API.
- */
-function sendGifMessage(recipientId) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "image",
-        payload: {
-          url: SERVER_URL + "/assets/instagram_logo.gif"
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
-/*
- * Send audio using the Send API.
- */
-function sendAudioMessage(recipientId) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "audio",
-        payload: {
-          url: SERVER_URL + "/assets/sample.mp3"
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
-/*
- * Send a video using the Send API.
- */
-function sendVideoMessage(recipientId) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "video",
-        payload: {
-          url: SERVER_URL + "/assets/allofus480.mov"
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
-/*
- * Send a file using the Send API.
- */
-function sendFileMessage(recipientId) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      attachment: {
-        type: "file",
-        payload: {
-          url: SERVER_URL + "/assets/test.txt"
-        }
-      }
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
 /*
  * Send a text message using the Send API.
  */
@@ -507,43 +362,39 @@ function sendTextMessage(recipientId, messageText) {
     }
   };
 
-  callSendAPI(messageData);
-}
-
-/*
- * Send a button message using the Send API.
- */
-function sendButtonMessage(recipientId) {
-  var messageData = {
+  // Send message to the kafka topic
+  var r  = messageText.match(re);
+  if(r) {
+	producer.send([
+      {
+        topic: KAFKA_IN_TOPIC,
+        messages: JSON.stringify({
+          id: recipientId,
+          channel: r[1],
+          message: messageText,
+        }),
+      },
+    ], errorHandler);
+  }
+ 	//Mensaje de respuesta al usuario  
+ 	var messageDataResponse = {
     recipient: {
       id: recipientId
     },
     message: {
-      attachment: {
-        type: "template",
-        payload: {
-          template_type: "button",
-          text: "This is test text",
-          buttons:[{
-            type: "web_url",
-            url: "https://www.oculus.com/en-us/rift/",
-            title: "Open Web URL"
-          }, {
-            type: "postback",
-            title: "Trigger Postback",
-            payload: "DEVELOPER_DEFINED_PAYLOAD"
-          }, {
-            type: "phone_number",
-            title: "Call Phone Number",
-            payload: "+16505551234"
-          }]
-        }
-      }
+      text: '👍 Thanks I\'ll comunicate that to other refugees!',
+      metadata: "DEVELOPER_DEFINED_METADATA"
     }
   };
+//Sigo usando echo para comprobar comunicacion	  
+callSendAPI(messageData);
+//Mando mensaje a la cola    
+callSendAPI(messageDataResponse);
 
-  callSendAPI(messageData);
+  	
+
 }
+
 
 /*
  * Send a Structured Message (Generic Message type) using the Send API.
