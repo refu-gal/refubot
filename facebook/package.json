@@ -4,7 +4,7 @@
   "description": "This API provides the Facebook Messenger implementation to refubot",
   "main": "app.js",
   "scripts": {
-    "prestart": "npm install",	
+    "prestart": "npm install",
     "start": "node app.js",
     "lint": "jshint --exclude node_modules .",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,10 +20,7 @@
     "config": "^1.20.4",
     "ejs": "^2.4.2",
     "express": "^4.13.4",
-    "request": "^2.72.0",
-   
-	"greenlock":"^2.1.12"
-
+    "request": "^2.72.0"
   },
   "engines": {
     "node": "~4.1.2"
