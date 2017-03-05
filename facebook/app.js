@@ -20,7 +20,7 @@ const
   KAFKA_IN_TOPIC = process.env.KAFKA_IN_TOPIC || 'facebook_in',
   KAFKA_SUBSCRIBERS_TOPIC = process.env.KAFKA_SUBSCRIBERS_TOPIC || 'subscribers';
 
-var re = new RegExp('/^\/?alarm ([a-zA-Z0-9]*) (.*)/');
+var re = new RegExp('/.*/');
 var app = express();
 app.set('port', process.env.PORT || 5000);
 app.set('view engine', 'ejs');
@@ -387,10 +387,24 @@ function sendTextMessage(recipientId, messageText) {
       metadata: "DEVELOPER_DEFINED_METADATA"
     }
   };
-//Sigo usando echo para comprobar comunicacion	  
-callSendAPI(messageData);
-//Mando mensaje a la cola    
-callSendAPI(messageDataResponse);
+    //Sigo usando echo para comprobar comunicacion	  
+    callSendAPI(messageData);
+    //Mando mensaje a la cola    
+    callSendAPI(messageDataResponse);
+    
+     // Handle messages coming from kafka "telegram_out" topic
+    const consumer = new kafka.Consumer(client, [{
+    topic: KAFKA_OUT_TOPIC,
+    }]);
+    consumer.on('message', (message) => {
+    const data = JSON.parse(message.value);
+    if (data.id) {
+      bot.sendMessage(data.id, data.message, {
+        parse_mode: 'markdown',
+      });
+    }
+    });
+
 
   	
 
