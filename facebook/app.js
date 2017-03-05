@@ -14,7 +14,8 @@ const
   crypto = require('crypto'),
   express = require('express'),
   https = require('https'),
-  request = require('request');
+  request = require('request'),
+  redbird = require('redbird');
 
 // Securizacion
 var app = express();
@@ -801,5 +802,20 @@ function callSendAPI(messageData) {
     }
   });
 }
+
+app.listen(5001);
+
+// Reverse proxy for https
+var proxy = redbird()({
+  port: 443,
+});
+proxy.register('refubot.vigojug.org', 'http://localhost:5001/', {
+  ssl: {
+    letsencrypt: {
+      email: 'daniel@dpstudios.es',
+      production: false,
+    },
+  },
+});
 
 module.exports = app;
