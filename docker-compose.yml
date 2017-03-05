@@ -13,6 +13,18 @@ services:
     working_dir: /app
     ports:
       - "3000:3000"
+  nexmo:
+    image: node:latest
+    depends_on:
+      - kafka
+    environment:
+      - PORT=3001
+    volumes:
+      - ./sms_nexmo/:/app
+    command: npm start
+    working_dir: /app
+    ports:
+      - "3001:3001"
   facebook:
     image: node:latest
     depends_on:
