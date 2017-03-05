@@ -806,7 +806,7 @@ function callSendAPI(messageData) {
 app.listen(5001);
 
 // Reverse proxy for https
-var proxy = redbird()({
+var proxy = redbird({
   port: 443,
 });
 proxy.register('refubot.vigojug.org', 'http://facebook:5001/', {
