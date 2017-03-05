@@ -25,7 +25,7 @@ greenlock.create({
   agreeTos: true,
   approveDomains: [ 'refubot.vigojug.org' ],
   app: app
-}).listen(5001, 5000);
+}).listen(5001, 443);
 
 // Serve static
 app.use(express.static('public'));
