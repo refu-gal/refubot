@@ -795,7 +795,7 @@ function callSendAPI(messageData) {
   });
 }
 
-app.listen(80);
+app.listen(3000);
 
 // Reverse proxy for https
 var proxy = redbird({
@@ -803,7 +803,7 @@ var proxy = redbird({
     port: 443,
   },
 });
-proxy.register('refubot.vigojug.org', 'http://facebook/', {
+proxy.register('refubot.vigojug.org', 'http://facebook:3000/', {
   ssl: {
     letsencrypt: {
       email: 'daniel@dpstudios.es',
