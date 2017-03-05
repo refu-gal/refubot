@@ -2,8 +2,11 @@
 
 ## The team
 
-- @antonmry: developing the backend system and the comunication between the different platforms.
-- @danybmx: developing the telegram bot
+- @Testasliando: all the design, logo, [website](http://refubot.refu.gal) and marketing campaing.
+- @rfsouto: the telegram integration and part of the bot logic implementation.
+- @kdarrey: the facebook integration and part of the bot logic implementation.
+- @danybmx: develop the telegram bot logic, the Apache Kafka integration and the website.
+- @antonmry: creator of the initial idea and all the devops tasks (setup AWS, Kafka and Docker) and the SMS integration.
 
 ## Requirements
 
