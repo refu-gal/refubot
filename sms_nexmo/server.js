@@ -22,7 +22,6 @@ const app = express();
 const KAFKA_ADDRESS = process.env.KAFKA_ADDRESS || 'kafka:2181';
 const KAFKA_OUT_TOPIC = process.env.KAFKA_OUT_TOPIC || 'sms_out';
 const KAFKA_IN_TOPIC = process.env.KAFKA_IN_TOPIC || 'sms_in';
-const KAFKA_LIST_TOPIC = process.env.KAFKA_LIST_TOPIC || 'topic_list';
 
 
 // HTTP Server
@@ -49,6 +48,9 @@ function handleParams(params, res) {
       type: params.type,
       timestamp: params['message-timestamp']
     };
+
+    // TODO: Here we should copy the SMS to Kafka
+
     res.send(incomingData);
   }
   res.status(200).end();
@@ -68,6 +70,10 @@ const startBot = () => {
   consumer.on('message', (message) => {
     const data = JSON.parse(message.value);
     console.log('Received message in sms_out');
+
+    // Here we should send SMS to the user
+
+
   });
 
   // Error handler for the bot
@@ -77,3 +83,21 @@ const startBot = () => {
     }
   };
 };
+
+var nexmo = new NexmoBot({
+  apiKey: config.API_KEY,
+  apiSecret: config.API_SECRET
+},
+{debug: config.DEBUG}
+);
+
+nexmo.message.sendSms(
+  config.FROM_NUMBER, '34616169549', 'testing refugal',
+    (err, responseData) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.dir(responseData);
+      }
+    }
+ );
