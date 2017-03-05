@@ -23,7 +23,7 @@ greenlock.create({
   server: 'staging',
   email: 'daniel@dpstudios.es',
   agreeTos: true,
-  approveDomains: [ 'refugal.vigojug.org' ],
+  approveDomains: [ 'refubot.vigojug.org' ],
   app: app
 }).listen(5001, 5000);
 
