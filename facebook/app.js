@@ -18,7 +18,7 @@ const
   KAFKA_ADDRESS = process.env.KAFKA_ADDRESS || 'kafka:2181',
   KAFKA_OUT_TOPIC = process.env.KAFKA_OUT_TOPIC || 'facebook_out',
   KAFKA_IN_TOPIC = process.env.KAFKA_IN_TOPIC || 'facebook_in',
-  KAFKA_SUBSCRIBERS_TOPIC = process.env.KAFKA_SUBSCRIBERS_TOPIC || 'subscribers';
+  KAFKA_LIST_TOPIC = process.env.KAFKA_LIST_TOPIC || 'topic_list';
 
 var re = new RegExp('/.*/');
 var app = express();
@@ -29,16 +29,15 @@ app.use(express.static('public'));
 
 const client = new kafka.Client(KAFKA_ADDRESS);
 const producer = new kafka.Producer(client);
-
+console.info('Try to create topics clients');
 producer.on('ready', () => {
   producer.createTopics([
     KAFKA_OUT_TOPIC,
     KAFKA_IN_TOPIC,
-    KAFKA_SUBSCRIBERS_TOPIC,
+    KAFKA_LIST_TOPIC,
   ], (err, data) => {
     if (err) console.error(err);
     console.info('Topics created, waiting 5 seconds before start the bot');
-    setTimeout(startBot, 5000);
   });
 });
 
