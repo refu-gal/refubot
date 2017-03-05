@@ -808,7 +808,7 @@ proxy.register('refubot.vigojug.org', 'http://facebook:3000/', {
     letsencrypt: {
       email: 'daniel@dpstudios.es',
       production: false,
-      path: './certs',
+      path: './',
       port: 5001
     },
   },
