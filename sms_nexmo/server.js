@@ -92,7 +92,8 @@ var nexmo = new NexmoBot({
 );
 
 nexmo.message.sendSms(
-  config.FROM_NUMBER, '34616169549', 'testing refugal',
+//  config.FROM_NUMBER, '34616169540', 'testing refugal',
+  'refubot', '34616169540', 'testing refugal',
     (err, responseData) => {
       if (err) {
         console.log(err);
