@@ -7,20 +7,19 @@
  */
 'use strict';
 
-const
+const 
   bodyParser = require('body-parser'),
-  greenlock = require('greenlock-express'),
   config = require('config'),
   crypto = require('crypto'),
   express = require('express'),
-  https = require('https'),
-  request = require('request'),
-  redbird = require('redbird');
+  https = require('https'),  
+  request = require('request');
 
-// Securizacion
+
 var app = express();
-
-// Serve static
+app.set('port', process.env.PORT || 5000);
+app.set('view engine', 'ejs');
+app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
 
 // App Secret can be retrieved from the App Dashboard
@@ -795,23 +794,8 @@ function callSendAPI(messageData) {
   });
 }
 
-app.listen(3000);
 
-// Reverse proxy for https
-var proxy = redbird({
-  ssl: {
-    port: 443,
-  },
+app.listen(app.get('port'), function() {
+  console.log('Node FaceBot app is running on port', app.get('port'));
 });
-proxy.register('refubot.vigojug.org', 'http://facebook:3000/', {
-  ssl: {
-    letsencrypt: {
-      email: 'daniel@dpstudios.es',
-      production: false,
-      path: './',
-      port: 5001
-    },
-  },
-});
-
 module.exports = app;

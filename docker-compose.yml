@@ -24,8 +24,7 @@ services:
     command: npm start
     working_dir: /app
     ports:
-      - "443:443"
-      - "5001:5001"
+      - "5000:5000"
   kafka:
     image: spotify/kafka
     volumes:
