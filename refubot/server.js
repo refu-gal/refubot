@@ -46,13 +46,15 @@ const startBot = () => {
  db.run("CREATE TABLE if not exists register (platform TEXT, platformId TEXT, topic TEXT)");
 
  const getRegisteredOnTopic = (topic,callback) => {
-   db.all("SELECT * from register where topic = ${topic}",function(err,rows){
+   db.all("SELECT * from register where topic = ?", topic,function(err,rows){
      for (i =0; i<rows.length; i++) console.log(JSON.stringify(rows[i]));
   });
  }
 
  const registerInTopic = (platform, platformId, topic) => {
-   db.run("INSERT OR REPLACE INTO register(platform, platformId, topic) VALUES (${platform}, ${platformId}, ${topic})" );
+   var stmt = db.prepare("INSERT OR REPLACE INTO register(platform, platformId, topic) VALUES (?, ?, ?)");
+   stmt.run(platform, platformId, topic);
+   stmt.finalize();
  }
  // Hanle messages coming from kafka "topic_list" topic
  const topicsOffset = new kafka.Offset(client);

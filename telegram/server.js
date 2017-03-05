@@ -5,7 +5,8 @@ const kafka = require('kafka-node');
 // Bot token
 // const TOKEN = process.env.TELEGRAM_TOKEN || '364419216:AAEe1tszpIxOWSLVDNXRs4_3GBUUqsocFCM';
 // const TOKEN = process.env.TELEGRAM_TOKEN || '133673383:AAGVx28t9c19uqlqOA64Ss7NSEDTwf46YR4';
-const TOKEN = '345129353:AAFJEsrcD_YJe0i4CLEMpZ0iEKiUNz80aVk';
+// const TOKEN = '345129353:AAFJEsrcD_YJe0i4CLEMpZ0iEKiUNz80aVk';
+const TOKEN = '338112340:AAHOnMNhGbPYeIVaE2PrTu9ispPXikvzb2s';
 const KAFKA_ADDRESS = process.env.KAFKA_ADDRESS || 'kafka:2181';
 const KAFKA_OUT_TOPIC = process.env.KAFKA_OUT_TOPIC || 'telegram_out';
 const KAFKA_IN_TOPIC = process.env.KAFKA_IN_TOPIC || 'telegram_in';
