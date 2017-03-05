@@ -90,6 +90,15 @@ To send/receive an SMS:
 
 https://docs.nexmo.com/messaging/sms-api
 
+### AWS
+
+```
+aws acm request-certificate --domain-name bot.galiglobal.org
+```
+
+
+
 ### Others
 
 TBC
+
