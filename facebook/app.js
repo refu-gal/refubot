@@ -20,14 +20,6 @@ const
 // Securizacion
 var app = express();
 
-greenlock.create({
-  server: 'https://acme-v01.api.letsencrypt.org/directory',
-  email: 'daniel@dpstudios.es',
-  agreeTos: true,
-  approveDomains: [ 'refubot.vigojug.org' ],
-  app: app
-}).listen(5001, 443);
-
 // Serve static
 app.use(express.static('public'));
 
@@ -806,10 +798,13 @@ function callSendAPI(messageData) {
 app.listen(5001);
 
 // Reverse proxy for https
-var proxy = redbird();
-proxy.register('refubot.vigojug.org', 'http://facebook:5001/', {
+var proxy = redbird({
   ssl: {
     port: 443,
+  },
+});
+proxy.register('refubot.vigojug.org', 'http://facebook:5001/', {
+  ssl: {
     letsencrypt: {
       email: 'daniel@dpstudios.es',
       production: false,
