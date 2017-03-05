@@ -414,7 +414,7 @@ function sendTextMessage(recipientId, messageText) {
           id: recipientId
         },
         message: {
-          text: message,
+          text: data.message,
           metadata: "DEVELOPER_DEFINED_METADATA"
         }
   }; 
