@@ -809,7 +809,7 @@ app.listen(5001);
 var proxy = redbird()({
   port: 443,
 });
-proxy.register('refubot.vigojug.org', 'http://localhost:5001/', {
+proxy.register('refubot.vigojug.org', 'http://facebook:5001/', {
   ssl: {
     letsencrypt: {
       email: 'daniel@dpstudios.es',
