@@ -61,6 +61,10 @@ const startBot = () => {
     db.run(`INSERT OR REPLACE INTO register(platform, platformId, topic) VALUES ('${platform}', '${platformId}', '${topic}')`);
   };
 
+  const unregisterFromTopic = (platform, platformId, topic) => {
+    db.run(`DELETE FROM register WHERE platform='${platform}' && platformId='${platformId}' && topic='${topic}'`);
+  };
+
   let topics = [];
   for (const key in services) {
     if (!services.hasOwnProperty(key)) continue;
@@ -96,9 +100,28 @@ const startBot = () => {
       ], errorHandler);
     }
 
+    if (/ya no estoy en (.*)/i.test(data.message)) {
+      const matches = data.message.match(/estoy en (.*)/i);
+      const channel = matches[1].toLowerCase();
+
+      // Register in topic on the BD
+      unregisterFromTopic(data.type, data.id, channel);
+
+      // Send message to the kafka in topic
+      return producer.send([
+        {
+          topic: services[data.type].topics.out,
+          messages: [JSON.stringify({
+            id: data.id,
+            message: 'Ya no estás subscrito para recibir información de ' + channel,
+          })],
+        },
+      ], errorHandler);
+    }
+
     // Alarm
-    if (/^(.*) (en|de) ([a-zA-Z0-9]*)$/i.test(data.message)) {
-      const matches = data.message.match(/^(.*) (en|de) ([a-zA-Z0-9]*)$/i);
+    if (/^(.*) (en|de|a|por) ([a-zA-Z0-9]*)$/i.test(data.message)) {
+      const matches = data.message.match(/^(.*) (en|de|a|por) ([a-zA-Z0-9]*)$/i);
       const channel = matches[3].toLowerCase();
 
       console.log('RECIPIENTS:');
