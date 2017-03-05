@@ -27,6 +27,15 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
 
+
+// Error handler for the bot
+const errorHandler = (err) => {
+    if (err) {
+      console.error(err);
+      bot.sendMessage('😞 Lo siento pero estoy teninendo problemas para contactar con el servidor.');
+    }
+ };
+
 const client = new kafka.Client(KAFKA_ADDRESS);
 const producer = new kafka.Producer(client);
 console.info('Try to create topics clients');
@@ -476,3 +485,5 @@ app.listen(app.get('port'), function() {
   console.log('Node FaceBot app is running on port', app.get('port'));
 });
 module.exports = app;
+
+

@@ -31,7 +31,6 @@ const producer = new kafka.Producer(client);
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('refubot.db');
 
-
 producer.on('ready', () => {
   let topics = [];
   for (const key in services) {
@@ -72,13 +71,14 @@ const startBot = () => {
   // Handle messages coming from kafka service in topic
   const consumer = new kafka.Consumer(client, topics);
   consumer.on('message', (message) => {
+    console.log(message);
     const data = JSON.parse(message.value);
 
     // Methods
 
     // Register
-    if (/estoy en (.*)/.test(data.message)) {
-      const matches = data.message.match(/estoy en (.*)/);
+    if (/estoy en (.*)/i.test(data.message)) {
+      const matches = data.message.match(/estoy en (.*)/i);
       const channel = matches[1].toLowerCase();
 
       // Register in topic on the BD
@@ -97,23 +97,18 @@ const startBot = () => {
     }
 
     // Alarm
-    if (/^(.*) (en|de) ([a-zA-Z0-9]*)$/.test(data.message)) {
-      const matches = data.message.match(/^(.*) (en|de) ([a-zA-Z0-9]*)$/);
+    if (/^(.*) (en|de) ([a-zA-Z0-9]*)$/i.test(data.message)) {
+      const matches = data.message.match(/^(.*) (en|de) ([a-zA-Z0-9]*)$/i);
       const channel = matches[3].toLowerCase();
 
-      return getRegisteredOnTopic(channel, (recipients) => {
-        producer.send([
-          {
-            topic: services[data.type].topics.out,
-            messages: [JSON.stringify({
-              id: data.id,
-              message: `Tu mensaje ha sido enviado a ${recipients.length - 1} personas. Gracias!!`,
-            })],
-          },
-        ], errorHandler);
+      console.log('RECIPIENTS:');
 
+      return getRegisteredOnTopic(channel, (recipients) => {
+        let count = 0;
         recipients.map((recipient) => {
-          if (recipient.platformId !== data.id) {
+          if (recipient.platformId+'' !== data.id+'') {
+            console.log('SENT TO ');
+            console.log(recipient);
             producer.send([
               {
                 topic: services[recipient.platform].topics.out,
@@ -123,8 +118,19 @@ const startBot = () => {
                 })],
               },
             ], errorHandler);
+            count++;
           }
         });
+
+        producer.send([
+          {
+            topic: services[data.type].topics.out,
+            messages: [JSON.stringify({
+              id: data.id,
+              message: `Tu mensaje ha sido enviado a ${count} personas. Gracias!!`,
+            })],
+          },
+        ], errorHandler);
       });
     };
 
