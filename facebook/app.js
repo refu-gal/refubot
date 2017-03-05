@@ -397,11 +397,24 @@ function sendTextMessage(recipientId, messageText) {
     }]);
     consumer.on('message', (message) => {
     const data = JSON.parse(message.value);
-    if (data.id) {
+        
+    var messageDataQueue = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      text: message,
+      metadata: "DEVELOPER_DEFINED_METADATA"
+    }
+  };    
+     callSendAPI(messageDataQueue);    
+        
+ /*   if (data.id) {
       bot.sendMessage(data.id, data.message, {
         parse_mode: 'markdown',
       });
-    }
+    }*/
+        
     });
 
 
